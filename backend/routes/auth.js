@@ -2,6 +2,9 @@ const express = require("express");
 const User = require("../models/User");
 const router = express.Router();
 const { body, validationResult } = require("express-validator");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const JWT_SECRET = "thisisasecret";
 
 router.post("/", [
     body("name", "Enter a valid name").isLength({ min: 5 }),
@@ -20,12 +23,17 @@ router.post("/", [
         }
 
         // create new user    
+        const salt = await bcrypt.genSalt(10);
+        const secPass = await bcrypt.hash(req.body.password, salt);
         user = await User.create({
             name: req.body.name,
             email: req.body.email,
-            password: req.body.password,
+            password: secPass,
         })
-        res.json(user);
+
+        const authToken = jwt.sign({ user: user._id }, JWT_SECRET);
+
+        res.json({authToken});
     } catch (error) {
         console.error(error.message);
         res.status(500).send("Some error occured");

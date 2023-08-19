@@ -19,7 +19,6 @@ const UserSchema = new Schema({
         type: String,
         required: true,
         trim: true,
-        maxlength: 32
     },
     date: {
         type: Date,
